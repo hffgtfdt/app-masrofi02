@@ -14,8 +14,9 @@ import {
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { Save, Calendar, Hash, MessageSquare, Smile, Frown, Meh } from 'lucide-react-native';
+import { Save, Calendar } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { validateAmount, validateCategory, validateMood, ValidationError } from '@/utils/validation';
 
 interface Expense {
   id: string;
@@ -44,6 +45,7 @@ export default function AddExpenseScreen() {
   const [note, setNote] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const colors = {
     primary: '#4CAF50',
@@ -76,18 +78,16 @@ export default function AddExpenseScreen() {
   ];
 
   const handleSaveExpense = async () => {
-    if (!amount || !selectedCategory || !selectedMood) {
-      Alert.alert('خطأ', 'يرجى ملء جميع الحقول المطلوبة');
-      return;
-    }
-
-    const expenseAmount = parseFloat(amount);
-    if (isNaN(expenseAmount) || expenseAmount <= 0) {
-      Alert.alert('خطأ', 'يرجى إدخال مبلغ صحيح');
-      return;
-    }
-
+    if (isLoading) return;
+    
     try {
+      setIsLoading(true);
+      
+      // التحقق من صحة البيانات
+      const expenseAmount = validateAmount(amount);
+      validateCategory(selectedCategory);
+      validateMood(selectedMood);
+      
       const userData = await AsyncStorage.getItem('userData');
       let currentData = userData ? JSON.parse(userData) : { salary: 0, monthlyExpenses: [] };
 
@@ -104,7 +104,7 @@ export default function AddExpenseScreen() {
       await AsyncStorage.setItem('userData', JSON.stringify(currentData));
 
       Alert.alert(
-        'تم الحفظ',
+        'تم الحفظ ✅',
         'تم إضافة المصروف بنجاح',
         [
           {
@@ -124,9 +124,26 @@ export default function AddExpenseScreen() {
         ]
       );
     } catch (error) {
-      console.error('Error saving expense:', error);
-      Alert.alert('خطأ', 'حدث خطأ أثناء حفظ المصروف');
+      if (error instanceof ValidationError) {
+        Alert.alert('خطأ في البيانات', error.message);
+      } else {
+        console.error('Error saving expense:', error);
+        Alert.alert('خطأ', 'حدث خطأ أثناء حفظ المصروف');
+      }
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleAmountChange = (text: string) => {
+    // السماح بالأرقام والنقطة العشرية فقط
+    const cleanText = text.replace(/[^0-9.]/g, '');
+    // منع أكثر من نقطة عشرية واحدة
+    const parts = cleanText.split('.');
+    if (parts.length > 2) {
+      return;
+    }
+    setAmount(cleanText);
   };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
@@ -155,10 +172,10 @@ export default function AddExpenseScreen() {
               style={[styles.amountInput, { 
                 backgroundColor: colors.inputBg, 
                 color: colors.text,
-                borderColor: colors.border 
+                borderColor: amount && validateAmount(amount) ? colors.primary : colors.border 
               }]}
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={handleAmountChange}
               placeholder="0"
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
@@ -251,11 +268,20 @@ export default function AddExpenseScreen() {
             maxLength={200}
           />
         </View>{/* Save Button */}<TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          style={[
+            styles.saveButton, 
+            { 
+              backgroundColor: isLoading ? colors.textSecondary : colors.primary,
+              opacity: isLoading ? 0.7 : 1 
+            }
+          ]}
           onPress={handleSaveExpense}
+          disabled={isLoading}
         >
           <Save size={24} color="white" />
-          <Text style={styles.saveButtonText}>حفظ المصروف</Text>
+          <Text style={styles.saveButtonText}>
+            {isLoading ? 'جاري الحفظ...' : 'حفظ المصروف'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -12,7 +12,10 @@ import {
 } from 'react-native';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Moon, Sun, Bell, Download, Share2, Trash2, DollarSign, Wallet, Info, CircleHelp as HelpCircle, Settings as SettingsIcon, ChevronRight } from 'lucide-react-native';
+import { Moon, Sun, Bell, Download, Upload, Share2, Trash2, DollarSign, Wallet, Info, CircleHelp as HelpCircle, ChevronRight } from 'lucide-react-native';
+import { useNotifications } from '@/providers/NotificationProvider';
+import { BackupService } from '@/utils/backup';
+import { validateSalary, ValidationError } from '@/utils/validation';
 
 interface AppSettings {
   darkMode: boolean;
@@ -24,6 +27,7 @@ interface AppSettings {
 
 export default function SettingsScreen() {
   const systemColorScheme = useColorScheme();
+  const { scheduleExpenseReminder, cancelAllNotifications } = useNotifications();
   const [settings, setSettings] = useState<AppSettings>({
     darkMode: systemColorScheme === 'dark',
     notifications: true,
@@ -84,6 +88,35 @@ export default function SettingsScreen() {
   const handleToggleDailyReminder = (value: boolean) => {
     const newSettings = { ...settings, dailyReminder: value };
     saveSettings(newSettings);
+    
+    if (value) {
+      scheduleExpenseReminder();
+    } else {
+      cancelAllNotifications();
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    await BackupService.createBackup();
+  };
+
+  const handleRestoreBackup = async () => {
+    Alert.alert(
+      'استعادة النسخة الاحتياطية',
+      'سيتم استبدال جميع البيانات الحالية. هل أنت متأكد؟',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        { 
+          text: 'استعادة', 
+          style: 'destructive',
+          onPress: () => BackupService.restoreBackup()
+        },
+      ]
+    );
+  };
+
+  const handleExportCSV = async () => {
+    await BackupService.exportToCSV();
   };
 
   const handleExportData = async () => {
@@ -142,23 +175,54 @@ export default function SettingsScreen() {
         {
           text: 'حفظ',
           onPress: async (input) => {
-            const newSalary = parseFloat(input || '0');
-            if (isNaN(newSalary) || newSalary < 0) {
-              Alert.alert('خطأ', 'يرجى إدخال مبلغ صحيح');
-              return;
-            }
-
             try {
+              const newSalary = validateSalary(input || '');
+              
               const userData = await AsyncStorage.getItem('userData');
               const currentData = userData ? JSON.parse(userData) : { monthlyExpenses: [] };
               currentData.salary = newSalary;
               currentData.salaryDate = new Date().toISOString();
               
               await AsyncStorage.setItem('userData', JSON.stringify(currentData));
-              Alert.alert('تم الحفظ', 'تم تحديث راتبك بنجاح');
+              Alert.alert('تم الحفظ ✅', 'تم تحديث راتبك بنجاح');
+            } catch (error) {
+              if (error instanceof ValidationError) {
+                Alert.alert('خطأ في البيانات', error.message);
+              } else {
+                console.error('Error updating salary:', error);
+                Alert.alert('خطأ', 'حدث خطأ أثناء تحديث الراتب');
+              }
+            }
+          },
+        },
+      ],
+      'plain-text',
+      '',
+      'numeric'
+    );
+  };
+
+  const handleResetMonthlyData = () => {
+    Alert.alert(
+      'إعادة ضبط البيانات الشهرية',
+      'سيتم حذف جميع المصاريف الشهرية. هل أنت متأكد؟',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'إعادة ضبط',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const userData = await AsyncStorage.getItem('userData');
+              if (userData) {
+                const currentData = JSON.parse(userData);
+                currentData.monthlyExpenses = [];
+                await AsyncStorage.setItem('userData', JSON.stringify(currentData));
+                Alert.alert('تم بنجاح', 'تم إعادة ضبط البيانات الشهرية');
+              }
             } catch (error) {
               console.error('Error updating salary:', error);
-              Alert.alert('خطأ', 'حدث خطأ أثناء تحديث الراتب');
+              Alert.alert('خطأ', 'حدث خطأ أثناء إعادة الضبط');
             }
           },
         },
@@ -172,7 +236,7 @@ export default function SettingsScreen() {
   const showAbout = () => {
     Alert.alert(
       'حول مصروفي',
-      'مصروفي - تطبيق إدارة المصاريف الشخصية\nالإصدار: 1.0.0\n\nتطبيق مصمم خصيصاً للمستخدمين العرب لتتبع وإدارة مصاريفهم الشخصية بطريقة بسيطة وفعالة.',
+      'مصروفي - تطبيق إدارة المصاريف الشخصية\nالإصدار: 1.0.0\n\nتطبيق مصمم خصيصاً للمستخدمين العرب لتتبع وإدارة مصاريفهم الشخصية بطريقة بسيطة وفعالة.\n\nالميزات:\n• تتبع المصاريف اليومية\n• تقارير مفصلة\n• أهداف مالية\n• نسخ احتياطية\n• تصدير البيانات',
       [{ text: 'حسناً' }]
     );
   };
@@ -180,7 +244,7 @@ export default function SettingsScreen() {
   const showHelp = () => {
     Alert.alert(
       'المساعدة',
-      'كيفية استخدام التطبيق:\n\n1. أدخل راتبك الشهري في الإعدادات\n2. سجل مصاريفك اليومية من خلال زر "إضافة مصروف"\n3. راجع تقاريرك المالية في قسم "التقارير"\n4. ضع أهدافاً مالية وتتبع تقدمك\n\nلأي استفسارات، تواصل معنا عبر البريد الإلكتروني.',
+      'كيفية استخدام التطبيق:\n\n1. أدخل راتبك الشهري في الإعدادات\n2. سجل مصاريفك اليومية من خلال زر "إضافة مصروف"\n3. راجع تقاريرك المالية في قسم "التقارير"\n4. ضع أهدافاً مالية وتتبع تقدمك\n5. استخدم النسخ الاحتياطية لحماية بياناتك\n\nنصائح:\n• سجل مصاريفك فور حدوثها\n• راجع التقارير أسبوعياً\n• ضع أهدافاً واقعية',
       [{ text: 'فهمت' }]
     );
   };
@@ -270,10 +334,34 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>إدارة البيانات</Text>
           
-          <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
+          <TouchableOpacity style={styles.settingItem} onPress={handleCreateBackup}>
             <View style={styles.settingLeft}>
               <Download size={24} color={colors.secondary} />
-              <Text style={[styles.settingLabel, { color: colors.text }]}>تصدير البيانات</Text>
+              <Text style={[styles.settingLabel, { color: colors.text }]}>إنشاء نسخة احتياطية</Text>
+            </View>
+            <ChevronRight size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem} onPress={handleRestoreBackup}>
+            <View style={styles.settingLeft}>
+              <Upload size={24} color={colors.accent} />
+              <Text style={[styles.settingLabel, { color: colors.text }]}>استعادة نسخة احتياطية</Text>
+            </View>
+            <ChevronRight size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem} onPress={handleExportCSV}>
+            <View style={styles.settingLeft}>
+              <Share2 size={24} color={colors.primary} />
+              <Text style={[styles.settingLabel, { color: colors.text }]}>تصدير إلى Excel</Text>
+            </View>
+            <ChevronRight size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem} onPress={handleResetMonthlyData}>
+            <View style={styles.settingLeft}>
+              <Trash2 size={24} color={colors.warning} />
+              <Text style={[styles.settingLabel, { color: colors.warning }]}>إعادة ضبط البيانات الشهرية</Text>
             </View>
             <ChevronRight size={20} color={colors.textSecondary} />
           </TouchableOpacity>
