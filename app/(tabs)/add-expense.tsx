@@ -148,7 +148,6 @@ export default function AddExpenseScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        
         {/* Amount Input */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>المبلغ</Text>
@@ -169,7 +168,6 @@ export default function AddExpenseScreen() {
             <Text style={[styles.currencyText, { color: colors.textSecondary }]}>د.ج</Text>
           </View>
         </View>
-
         {/* Category Selection */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>التصنيف</Text>
@@ -196,7 +194,6 @@ export default function AddExpenseScreen() {
             ))}
           </View>
         </View>
-
         {/* Date Selection */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>التاريخ</Text>
@@ -220,7 +217,6 @@ export default function AddExpenseScreen() {
             />
           )}
         </View>
-
         {/* Mood Selection */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>الحالة المزاجية</Text>
@@ -247,7 +243,6 @@ export default function AddExpenseScreen() {
             ))}
           </View>
         </View>
-
         {/* Note Input */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>ملاحظة (اختياري)</Text>
@@ -266,7 +261,6 @@ export default function AddExpenseScreen() {
             maxLength={200}
           />
         </View>
-
         {/* Save Button */}
         <TouchableOpacity
           style={[styles.saveButton, { backgroundColor: colors.primary }]}
@@ -275,7 +269,6 @@ export default function AddExpenseScreen() {
           <Save size={24} color="white" />
           <Text style={styles.saveButtonText}>حفظ المصروف</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
