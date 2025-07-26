@@ -148,8 +148,7 @@ export default function AddExpenseScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        {/* Amount Input */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        {/* Amount Input */}<View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>المبلغ</Text>
           <View style={styles.amountContainer}>
             <TextInput
@@ -167,9 +166,7 @@ export default function AddExpenseScreen() {
             />
             <Text style={[styles.currencyText, { color: colors.textSecondary }]}>د.ج</Text>
           </View>
-        </View>
-        {/* Category Selection */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        </View>{/* Category Selection */}<View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>التصنيف</Text>
           <View style={styles.categoriesGrid}>
             {categories.map((category) => (
@@ -193,9 +190,7 @@ export default function AddExpenseScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-        {/* Date Selection */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        </View>{/* Date Selection */}<View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>التاريخ</Text>
           <TouchableOpacity
             style={[styles.dateButton, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
@@ -206,8 +201,7 @@ export default function AddExpenseScreen() {
               {selectedDate.toLocaleDateString('ar')}
             </Text>
           </TouchableOpacity>
-
-          {showDatePicker && (
+{showDatePicker && (
             <DateTimePicker
               value={selectedDate}
               mode="date"
@@ -216,9 +210,7 @@ export default function AddExpenseScreen() {
               maximumDate={new Date()}
             />
           )}
-        </View>
-        {/* Mood Selection */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        </View>{/* Mood Selection */}<View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>الحالة المزاجية</Text>
           <View style={styles.moodsContainer}>
             {moods.map((mood) => (
@@ -242,9 +234,7 @@ export default function AddExpenseScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-        {/* Note Input */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        </View>{/* Note Input */}<View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>ملاحظة (اختياري)</Text>
           <TextInput
             style={[styles.noteInput, { 
@@ -260,9 +250,7 @@ export default function AddExpenseScreen() {
             numberOfLines={3}
             maxLength={200}
           />
-        </View>
-        {/* Save Button */}
-        <TouchableOpacity
+        </View>{/* Save Button */}<TouchableOpacity
           style={[styles.saveButton, { backgroundColor: colors.primary }]}
           onPress={handleSaveExpense}
         >
