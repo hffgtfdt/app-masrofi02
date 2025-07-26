@@ -227,21 +227,17 @@ export default function AnalyticsScreen() {
           <View style={styles.metricItem}>
             <DollarSign size={24} color={colors.primary} />
             <Text style={[styles.metricValue, { color: colors.text }]}>
-              {totalExpenses.toLocaleString()} د.ج
+              <Text>{totalExpenses.toLocaleString()}</Text><Text> د.ج</Text>
             </Text>
-            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-              إجمالي المصاريف
-            </Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>إجمالي المصاريف</Text>
           </View>
 
           <View style={styles.metricItem}>
             <Calendar size={24} color={colors.secondary} />
             <Text style={[styles.metricValue, { color: colors.text }]}>
-              {averageDaily.toLocaleString()} د.ج
+              <Text>{averageDaily.toLocaleString()}</Text><Text> د.ج</Text>
             </Text>
-            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-              متوسط يومي
-            </Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>متوسط يومي</Text>
           </View>
 
           <View style={styles.metricItem}>
@@ -253,11 +249,9 @@ export default function AnalyticsScreen() {
             <Text style={[styles.metricValue, { 
               color: spendingTrend.isIncrease ? colors.danger : colors.primary
             }]}>
-              {spendingTrend.change}%
+              <Text>{spendingTrend.change}</Text><Text>%</Text>
             </Text>
-            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-              تغيير من الشهر الماضي
-            </Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>تغيير من الشهر الماضي</Text>
           </View>
         </View>
 
@@ -307,7 +301,7 @@ export default function AnalyticsScreen() {
             <View style={styles.insightItem}>
               <AlertCircle size={20} color={colors.warning} />
               <Text style={[styles.insightText, { color: colors.text }]}>
-                أكثر فئة إنفاقاً: {topCategory.name} ({topCategory.amount.toLocaleString()} د.ج)
+                <Text>أكثر فئة إنفاقاً: </Text><Text>{topCategory.name}</Text><Text> (</Text><Text>{topCategory.amount.toLocaleString()}</Text><Text> د.ج)</Text>
               </Text>
             </View>
           )}
@@ -315,7 +309,7 @@ export default function AnalyticsScreen() {
           <View style={styles.insightItem}>
             <TrendingUp size={20} color={colors.secondary} />
             <Text style={[styles.insightText, { color: colors.text }]}>
-              معدل الإنفاق اليومي: {averageDaily.toFixed(0)} د.ج
+              <Text>معدل الإنفاق اليومي: </Text><Text>{averageDaily.toFixed(0)}</Text><Text> د.ج</Text>
             </Text>
           </View>
 
@@ -323,7 +317,7 @@ export default function AnalyticsScreen() {
             <View style={styles.insightItem}>
               <DollarSign size={20} color={colors.primary} />
               <Text style={[styles.insightText, { color: colors.text }]}>
-                نسبة الإنفاق من الراتب: {((totalExpenses / userData.salary) * 100).toFixed(1)}%
+                <Text>نسبة الإنفاق من الراتب: </Text><Text>{((totalExpenses / userData.salary) * 100).toFixed(1)}</Text><Text>%</Text>
               </Text>
             </View>
           )}
@@ -348,7 +342,7 @@ export default function AnalyticsScreen() {
                   />
                 </View>
                 <Text style={[styles.moodAmount, { color: colors.textSecondary }]}>
-                  {mood.amount.toLocaleString()} د.ج ({mood.percentage}%)
+                  <Text>{mood.amount.toLocaleString()}</Text><Text> د.ج (</Text><Text>{mood.percentage}</Text><Text>%)</Text>
                 </Text>
               </View>
             ))}
@@ -360,19 +354,15 @@ export default function AnalyticsScreen() {
           <Text style={styles.recommendationsTitle}>💡 توصيات لتحسين الإنفاق</Text>
           
           {totalExpenses > userData.salary * 0.8 && (
-            <Text style={styles.recommendationText}>
-              • تقترب من حد الراتب، حاول تقليل الإنفاق في الفئات الاختيارية
-            </Text>
+            <Text style={styles.recommendationText}>• تقترب من حد الراتب، حاول تقليل الإنفاق في الفئات الاختيارية</Text>
           )}
           
           {topCategory.name === 'طعام' && (
-            <Text style={styles.recommendationText}>
-              • أكثر إنفاقك على الطعام، جرب الطبخ في المنزل أكثر
-            </Text>
+            <Text style={styles.recommendationText}>• أكثر إنفاقك على الطعام، جرب الطبخ في المنزل أكثر</Text>
           )}
           
           <Text style={styles.recommendationText}>
-            • ضع ميزانية يومية قدرها {(userData.salary / 30).toFixed(0)} د.ج للتحكم في الإنفاق
+            <Text>• ضع ميزانية يومية قدرها </Text><Text>{(userData.salary / 30).toFixed(0)}</Text><Text> د.ج للتحكم في الإنفاق</Text>
           </Text>
         </View>
 
